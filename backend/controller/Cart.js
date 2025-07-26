@@ -11,9 +11,12 @@ const addToCart = async (req, res) => {
     }
 }
 
-const fetchAllItems = async (req, res) => {
+const fetchItemsByUser = async (req, res) => {
+    const { user } = req.query;
+   
+    
     try {
-        const cartItems = await Cart.find().populate("product");
+        const cartItems = await Cart.find({ user: user }).populate("product");
         res.status(200).json(cartItems)
     } catch (error) {
         res.status(400).json(error);
@@ -47,4 +50,4 @@ const updateItem=async (req,res)=>{
 
 
 
-export { addToCart ,fetchAllItems,deleteItem,updateItem};
+export { addToCart ,fetchItemsByUser,deleteItem,updateItem};

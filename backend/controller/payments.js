@@ -1,11 +1,9 @@
 import Stripe from "stripe";
 import dotenv from 'dotenv';
 dotenv.config();
-console.log(process.env.STRIPE_SECRET_KEY);
 const stripe=new Stripe(process.env.STRIPE_SECRET_KEY)
 
 const payment = async (req, res) => {
-console.log("hello");
 
   const { items, customer_email } = req.body;
 
@@ -26,7 +24,7 @@ console.log("hello");
       line_items,
       mode: "payment",
       customer_email,
-      success_url: "http://localhost:5173/checkout/",
+      success_url: `${process.env.CLIENT_URL}/checkout/`,
       cancel_url: "http://localhost:3000/cancel",
     });
 

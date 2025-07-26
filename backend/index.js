@@ -8,6 +8,8 @@ import dotenv from 'dotenv';
 import path from "path";
 import { fileURLToPath } from "url";
 import { paymentRouter } from "./routes/Payment.js";
+import { authRouter } from "./routes/Auth.js";
+import cookieParser from "cookie-parser";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -22,9 +24,22 @@ async function main() {
   console.log("Database connected");
 
 }
+
+server.use(cookieParser());
 server.use(express.static(path.join(__dirname, "build")));
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.CLIENT_URL
+];
+
 server.use(cors({
-  origin: "http://localhost:5173",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 server.use(express.json());
@@ -33,6 +48,7 @@ server.use('/products', router);
 server.use('/cart',cartRouter)
 server.use('/order',orderRouter)
 server.use('/payment',paymentRouter)
+server.use('/',authRouter)
 server.get('/', (req, res) => {
   res.json({ succes: "done" });
 })

@@ -1,8 +1,8 @@
 import express from "express";
-import { addToCart, deleteItem,fetchAllItems, updateItem } from "../controller/Cart.js";
+import { addToCart, deleteItem, fetchItemsByUser, updateItem } from "../controller/Cart.js";
 const cartRouter=express.Router();
 
-cartRouter.get('/',fetchAllItems)
+cartRouter.get('/',fetchItemsByUser)
 .post('/',addToCart)
 .delete('/:id',deleteItem)
 .patch("/:id",updateItem)
