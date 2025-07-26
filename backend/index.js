@@ -28,7 +28,7 @@ async function main() {
 server.use(cookieParser());
 server.use(express.static(path.join(__dirname, "build")));
 const allowedOrigins = [
-  "http://localhost:5173",
+  "https://mern-ecommerce-stripe.vercel.app",
   process.env.CLIENT_URL
 ];
 
