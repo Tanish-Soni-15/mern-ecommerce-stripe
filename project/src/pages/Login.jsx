@@ -34,7 +34,7 @@ function Login() {
     const Result = await response.json();
 
     if (response.ok) {
-      navigate("/analyze");
+      navigate("/");
     } else {
       alert(Result.message);
     }
