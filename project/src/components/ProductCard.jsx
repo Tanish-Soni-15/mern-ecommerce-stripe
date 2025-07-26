@@ -2,16 +2,28 @@ import { Link } from 'react-router-dom';
 import { Star, ShoppingCart } from 'lucide-react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCartAsync } from '../features/cart/cartSlice';
 import { convertDollarToRupees } from '../utils/math';
+import { selectLoggedInUser } from '../features/auth/authSlice';
 const ProductCard = ({ product }) => {
+  const user=useSelector(selectLoggedInUser)
 const dispatch=useDispatch();
  const handleAddToCart =async (e) => {
       e.preventDefault();
-       const newItem = {
+       if (!user) {
+      toast.error("Please log in to add items to cart!", {
+        position: "bottom-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        theme: "colored",
+      });
+      return;
+    }
+    const newItem = {
       product: product.id,
       quantity: 1,
+      user: user.id,
     };
       try{
         await dispatch(addToCartAsync(newItem)).unwrap();

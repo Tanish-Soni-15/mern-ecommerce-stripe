@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CreditCard, Lock, Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  fetchAllItemsAsync,
+  
   resetCartAsync,
   selectItems,
 } from "../features/cart/cartSlice";
@@ -14,16 +14,19 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { convertDollarToRupees } from "../utils/math";
 import { loadStripe } from "@stripe/stripe-js";
+import Header from "../components/Header";
+import { selectLoggedInUser, verifyUserAsync } from "../features/auth/authSlice";
 
 const CheckoutPage = () => {
+  const user=useSelector(selectLoggedInUser)
+  
+  
   const stripePromise = loadStripe(
     "pk_test_51RjzBN00hbxx8HuK0lOZcmj2HfN0RXSUtWBF3Y6RCOFalvoQZhiw7iEGwtnsR6kzXV41eJbEKiF31b5KxIJKE6jI00GHE8dmMG"
   );
   const dispatch = useDispatch();
   const items = useSelector(selectItems);
-  useEffect(() => {
-    dispatch(fetchAllItemsAsync());
-  }, [dispatch]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -33,6 +36,7 @@ const CheckoutPage = () => {
       setStep(Number(savedStep));
       localStorage.removeItem("checkoutStep"); // clear after reading
     }
+
   }, []);
 
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -75,12 +79,12 @@ const CheckoutPage = () => {
 
   const handleCheckout = async () => {
     if (selectedAddress && step == 1) {
-      console.log("hhh");
+      
 
       try {
         setisloading(true);
-        console.log("pppp");
-        const res = await fetch("http://localhost:8081/payment/", {
+        
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/payment/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -89,7 +93,7 @@ const CheckoutPage = () => {
         });
 
         const data = await res.json();
-        console.log("data", data);
+       
         setisloading(false);
         localStorage.setItem("checkoutStep", "3");
 
@@ -99,6 +103,18 @@ const CheckoutPage = () => {
             totalAmount,
             paymentMethod,
             selectedAddress,
+            id:user.id
+          })
+        );
+         localStorage.setItem(
+          "order",
+          JSON.stringify({
+            total:totalAmount,
+            shippingAddress:selectedAddress,
+            user:user.id,
+            items,
+
+
           })
         );
 
@@ -119,24 +135,35 @@ const CheckoutPage = () => {
   const [isloading, setisloading] = useState(false);
 
   const handleOrder = async () => {
-    console.log("step", step);
+   
     const paymentData = localStorage.getItem("paymentInfo");
-    if (step == 3 && paymentData) {
-      console.log("loooo");
+    const sorder = localStorage.getItem("order");
+    if (step == 3 && paymentData && sorder) {
+     
 
       try {
-        const { totalAmount, paymentMethod, selectedAddress } =
-          JSON.parse(paymentData);
+        
+        const { totalAmount, paymentMethod, selectedAddress,id } = JSON.parse(paymentData);
+        dispatch(resetCartAsync(id));
+        const sendingOrder = JSON.parse(sorder);
         const order = { totalAmount, paymentMethod, selectedAddress };
-        const response = await fetch("http://localhost:8081/order", {
+        const result = await fetch(`${import.meta.env.VITE_BACKEND_URL}/order/c`, {
+          method: "POST",
+          body: JSON.stringify(sendingOrder),
+          headers: { "content-type": "application/json" },
+        });
+        
+        
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/order`, {
           method: "POST",
           body: JSON.stringify(order),
           headers: { "content-type": "application/json" },
         });
         
         setStep(3);
-        dispatch(resetCartAsync());
+        dispatch(resetCartAsync(id));
         localStorage.removeItem("paymentInfo");
+        localStorage.removeItem("order");
       } catch (err) {
         console.log(err);
       }
@@ -153,6 +180,8 @@ const CheckoutPage = () => {
 
   if (items.length === 0 && step !== 3) {
     return (
+      <>
+      <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -166,10 +195,13 @@ const CheckoutPage = () => {
           </button>
         </div>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+    <Header />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Checkout</h1>
@@ -260,7 +292,7 @@ const CheckoutPage = () => {
             <form
               onSubmit={handleSubmit((data) => {
                 // e.preventDefault();
-                console.log(data);
+                
 
                 setaddresses([...addresses, data]);
                 reset();
@@ -544,6 +576,7 @@ const CheckoutPage = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 

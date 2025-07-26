@@ -5,19 +5,18 @@ import { useSelector, useDispatch } from "react-redux";
 
 import {
   deleteItemFromCartAsync,
-  fetchAllItemsAsync,
-  resetCartAsync,
+    resetCartAsync,
   selectItems,
   updateCartAsync,
 } from "../features/cart/cartSlice";
 import { convertDollarToRupees } from "../utils/math";
+import Header from "../components/Header";
+import { selectLoggedInUser } from "../features/auth/authSlice";
 const CartPage = () => {
-
+   const user=useSelector(selectLoggedInUser)
   const dispatch = useDispatch();
   const items = useSelector(selectItems);
-  useEffect(()=>{
-    dispatch(fetchAllItemsAsync());
-  },[dispatch])
+ 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -47,7 +46,6 @@ const CartPage = () => {
   };
 
   const handleRemove = ( id) => {
-    console.log("id",id);
     
     dispatch(deleteItemFromCartAsync(id));
   };
@@ -57,14 +55,16 @@ const CartPage = () => {
   }, [items]);
 
   const resetCartItems = () => {
-    dispatch(resetCartAsync());
+    dispatch(resetCartAsync(user.id));
     setcartItems([]);
   };
 
   if (items.length === 0) {
     return (
+      <>
+      <Header />
       <div
-        className="flex w-screen mt-[80px] flex-col md:flex-row  justify-center items-center gap-4 pb-20"
+        className="flex h-[70vh] w-screen mt-[80px] flex-col md:flex-row  justify-center items-center gap-4 pb-20"
         style={{ opacity: "1", transition: "none" }}
       >
         <div>
@@ -89,10 +89,13 @@ const CartPage = () => {
           </NavLink>
         </div>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+    <Header />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {items && (
         <>
@@ -218,6 +221,7 @@ const CartPage = () => {
         </>
       )}
     </div>
+    </>
   );
 };
 

@@ -4,15 +4,22 @@ import ProductCard from '../components/ProductCard';
 import { categories } from '../data/products';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProducts, selectProducts } from '../features/getProducts/productSlice';
+import Header from '../components/Header';
+import { verifyUserAsync } from '../features/auth/authSlice';
 
 const ShopPage = () => {
+  
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
    const products = useSelector(selectProducts);
   const dispatch = useDispatch();
+  useEffect(()=>{
+dispatch(verifyUserAsync())
+  },[])
     useEffect(() => {
+
     dispatch(getProducts());
   }, [dispatch]);
   const filteredProducts = useMemo(() => {
@@ -66,6 +73,8 @@ const ShopPage = () => {
   }, [selectedCategory, searchTerm, priceRange, sortBy,products]);
 
   return (
+    <>
+    <Header />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
      
       <div className="mb-8 text-center">
@@ -151,6 +160,7 @@ const ShopPage = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
